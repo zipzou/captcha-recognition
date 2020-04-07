@@ -80,11 +80,14 @@ def train(path, split=[6, 1, 1], batch_size=64, epochs=100, learning_rate=0.001,
     initial_epoch = 0
 
   # load history
-  batch_history = load_history(filename='history_batch.json', history_path=log_file)
-  epoch_history = load_history(filename='history_epoch.json', history_path=log_file)
+  batch_history_train = load_history(filename='history_batch_train.json', history_path=log_file)
+  epoch_history_train = load_history(filename='history_epoch_train.json', history_path=log_file)
+  epoch_history_dev = load_history(filename='history_epoch_dev.json', history_path=log_file)
   # slice
-  batch_history = batch_history[:initial_epoch]
-  epoch_history = epoch_history[:initial_epoch]
+  batch_history_train = batch_history_train[:initial_epoch]
+  epoch_history_train = epoch_history_train[:initial_epoch]
+  epoch_history_dev = epoch_history_dev[:initial_epoch]
+
 
   if gpu and gpu_available:
     model = model.cuda()
@@ -116,20 +119,22 @@ def train(path, split=[6, 1, 1], batch_size=64, epochs=100, learning_rate=0.001,
 
           batch_bar.set_postfix(loss=loss_count.item(), acc=acc_mean)
           batch_bar.update()
-          batch_history.append([loss_count.item(), acc_mean])
-          save_history('history_batch.json', batch_history, log_file)
+          batch_history_train.append([loss_count.item(), acc_mean])
+          save_history('history_batch.json', batch_history_train, log_file)
 
           loss_count.backward()
           optm.step()
 
       epoch_bar.set_postfix(loss_mean=np.mean(loss_batchs), acc_mean=np.mean(acc_batchs))
       epoch_bar.update()
-      epoch_history.append([np.mean(loss_batchs).item(), np.mean(acc_batchs).mean()])
-      save_history('history_epoch.json', epoch_history, log_file)
+      epoch_history_train.append([np.mean(loss_batchs).item(), np.mean(acc_batchs).mean()])
+      save_history('history_epoch.json', epoch_history_train, log_file)
 
       # validate
       with tqdm(total=np.ceil(len(dev_loader.dataset) / batch_size), desc='Val Batch') as batch_bar:
         model.eval()
+        loss_batchs_dev = []
+        acc_batchs_dev = []
         for batch, (x, y) in enumerate(dev_loader):
           x = torch.tensor(x, requires_grad=False)
           y = torch.tensor(y, requires_grad=False)
@@ -144,11 +149,13 @@ def train(path, split=[6, 1, 1], batch_size=64, epochs=100, learning_rate=0.001,
           acc_count = acc(pred_1, y[:,0]) + acc(pred_2, y[:,1]) + acc(pred_3, y[:,2]) + acc(pred_4, y[:,3])
           acc_mean = acc_count / 4.
 
-          loss_batchs.append(loss_count.item())
-          acc_batchs.append(acc_mean)
+          loss_batchs_dev.append(loss_count.item())
+          acc_batchs_dev.append(acc_mean)
 
           batch_bar.set_postfix(loss=loss_count.item(), acc=acc_mean)
           batch_bar.update()
+          epoch_history_dev.append([np.mean(loss_batchs_dev), np.mean(acc_batchs_dev)])
+          save_history('history_epoch_dev.json', epoch_history_dev, log_file)
 
       # saving
       if not os.path.exists(model_dir):
