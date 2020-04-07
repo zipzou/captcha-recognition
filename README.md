@@ -7,6 +7,6 @@
 
 ## 模型效果
 
-![损失](loss.pdf)
+![损失](loss.svg)
 
-![ACC曲线](acc.pdf)
+![ACC曲线](acc.svg)
