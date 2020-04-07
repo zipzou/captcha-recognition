@@ -120,7 +120,7 @@ def train(path, split=[6, 1, 1], batch_size=64, epochs=100, learning_rate=0.001,
           batch_bar.set_postfix(loss=loss_count.item(), acc=acc_mean)
           batch_bar.update()
           batch_history_train.append([loss_count.item(), acc_mean])
-          save_history('history_batch.json', batch_history_train, log_file)
+          save_history('history_batch_train.json', batch_history_train, log_file)
 
           loss_count.backward()
           optm.step()
@@ -128,7 +128,7 @@ def train(path, split=[6, 1, 1], batch_size=64, epochs=100, learning_rate=0.001,
       epoch_bar.set_postfix(loss_mean=np.mean(loss_batchs), acc_mean=np.mean(acc_batchs))
       epoch_bar.update()
       epoch_history_train.append([np.mean(loss_batchs).item(), np.mean(acc_batchs).mean()])
-      save_history('history_epoch.json', epoch_history_train, log_file)
+      save_history('history_epoch_train.json', epoch_history_train, log_file)
 
       # validate
       with tqdm(total=np.ceil(len(dev_loader.dataset) / batch_size), desc='Val Batch') as batch_bar:
