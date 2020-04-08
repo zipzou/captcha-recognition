@@ -98,7 +98,7 @@ def train(path, split=[6, 1, 1], batch_size=64, epochs=100, learning_rate=0.001,
       model.train()
       loss_batchs = []
       acc_batchs = []
-      with tqdm(total=np.ceil(len(train_loader.dataset) / batch_size), desc='Batch') as batch_bar:
+      with tqdm(total=int(np.ceil(len(train_loader.dataset) / batch_size)), desc='Batch') as batch_bar:
         for batch, (x, y) in enumerate(train_loader):
           optm.zero_grad()
           x = torch.tensor(x, requires_grad=True)
@@ -131,7 +131,7 @@ def train(path, split=[6, 1, 1], batch_size=64, epochs=100, learning_rate=0.001,
       save_history('history_epoch_train.json', epoch_history_train, log_file)
 
       # validate
-      with tqdm(total=np.ceil(len(dev_loader.dataset) / batch_size), desc='Val Batch') as batch_bar:
+      with tqdm(total=int(np.ceil(len(dev_loader.dataset) / batch_size)), desc='Val Batch') as batch_bar:
         model.eval()
         loss_batchs_dev = []
         acc_batchs_dev = []
@@ -154,8 +154,8 @@ def train(path, split=[6, 1, 1], batch_size=64, epochs=100, learning_rate=0.001,
 
           batch_bar.set_postfix(loss=loss_count.item(), acc=acc_mean)
           batch_bar.update()
-          epoch_history_dev.append([np.mean(loss_batchs_dev), np.mean(acc_batchs_dev)])
-          save_history('history_epoch_dev.json', epoch_history_dev, log_file)
+        epoch_history_dev.append([np.mean(loss_batchs_dev), np.mean(acc_batchs_dev)])
+        save_history('history_epoch_dev.json', epoch_history_dev, log_file)
 
       # saving
       if not os.path.exists(model_dir):
