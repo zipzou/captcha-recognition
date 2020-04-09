@@ -1,6 +1,5 @@
 cycler==0.10.0
 joblib==0.14.1
-kiwisolver==1.2.0
 matplotlib==3.2.1
 numpy==1.18.2
 Pillow==7.1.1

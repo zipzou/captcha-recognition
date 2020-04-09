@@ -24,12 +24,18 @@ def get_dict():
   """
   label2id = {}
   id2label = {}
+  # upper case
   for i in range(26):
     label2id[chr(ord('A') + i)] = 1 + i
     id2label[1 + i] = chr(ord('A') + i)
+  # lower case
+  for i in range(26):
+    label2id[chr(ord('a') + i)] = 1 + i
+    id2label[1 + i] = chr(ord('a') + i)
+  # numbers
   for i in range(10):
-    label2id[chr(ord('0') + i)] = 27 + i 
-    id2label[27 + i] = chr(ord('0') + i)
+    label2id[chr(ord('0') + i)] = 53 + i 
+    id2label[53 + i] = chr(ord('0') + i)
 
   return label2id, id2label
 

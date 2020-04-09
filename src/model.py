@@ -29,18 +29,18 @@ class CaptchaModel(nn.Module):
     #   nn.RReLU(),
     # )
 
-    self.dense1 = nn.Sequential(
-      nn.Linear(256, 64),
-      nn.BatchNorm1d(64),
-      nn.RReLU()
-    )
+    # self.dense1 = nn.Sequential(
+    #   nn.Linear(256, 64),
+    #   nn.BatchNorm1d(64),
+    #   nn.RReLU()
+    # )
 
     self.dropout = nn.Dropout(0.3)
 
-    self.out1 = nn.Linear(256, 36)
-    self.out2 = nn.Linear(256, 36)
-    self.out3 = nn.Linear(256, 36)
-    self.out4 = nn.Linear(256, 36)
+    self.out1 = nn.Linear(256, 62)
+    self.out2 = nn.Linear(256, 62)
+    self.out3 = nn.Linear(256, 62)
+    self.out4 = nn.Linear(256, 62)
 
   def forward(self, input):
     y_conv1 = self.conv1(input)

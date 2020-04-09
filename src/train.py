@@ -58,21 +58,34 @@ def train(path, split=[6, 1, 1], batch_size=64, epochs=100, learning_rate=0.001,
   optm = torch.optim.Adam(model.parameters(), lr=learning_rate)
   loss_fn = nn.CrossEntropyLoss()
 
-  # start from a pickle
-  if continue_pkl is None and os.path.exists(os.path.join(model_dir, 'model-latest.pkl')):
-    latest_state = torch.load(os.path.join(model_dir, 'model-latest.pkl'))
-    model.load_state_dict(latest_state['network'])
-    optm.load_state_dict(latest_state['optimizer'])
-    initial_epoch = latest_state['epoch'] + 1
+  if gpu and gpu_available:
+    model = model.cuda()
+    loss_fn = loss_fn.cuda()
 
-  elif continue_pkl is not None and os.path.exists(os.path.join(model_dir, continue_pkl)):
-    initial_state = torch.load(os.path.join(model_dir, continue_pkl))
+  # start from a pickle
+  if continue_pkl is not None and os.path.exists(os.path.join(model_dir, continue_pkl)):
+    if gpu and gpu_available:
+      initial_state = torch.load(os.path.join(model_dir, continue_pkl))
+    else:
+      initial_state = torch.load(os.path.join(model_dir, continue_pkl), map_location=lambda storage, loc: storage)
     model.load_state_dict(initial_state['network'])
     optm.load_state_dict(initial_state['optimizer'])
     initial_epoch = initial_state['epoch'] + 1
 
-  elif continue_pkl is None and initial_epoch is not None and os.path.exists(os.path.join(model_dir, 'model-%d.pkl' % initial_epoch)):
-    initial_state = torch.load(os.path.join(model_dir, 'model-%d.pkl' % initial_epoch))
+  elif continue_pkl is not None and os.path.exists(os.path.join(model_dir, 'model-latest.pkl')):
+    if gpu and gpu_available:
+      latest_state = torch.load(os.path.join(model_dir, 'model-latest.pkl'))
+    else:
+      latest_state = torch.load(os.path.join(model_dir, 'model-latest.pkl'), map_location=lambda storage,loc: storage)
+    model.load_state_dict(latest_state['network'])
+    optm.load_state_dict(latest_state['optimizer'])
+    initial_epoch = latest_state['epoch'] + 1
+
+  elif continue_pkl is not None and initial_epoch is not None and os.path.exists(os.path.join(model_dir, 'model-%d.pkl' % initial_epoch)):
+    if gpu and gpu_available:
+      initial_state = torch.load(os.path.join(model_dir, 'model-%d.pkl' % initial_epoch))
+    else:
+      initial_state = torch.load(os.path.join(model_dir, 'model-%d.pkl' % initial_epoch), map_location=lambda storage, _: storage)
     model.load_state_dict(initial_state['network'])
     optm.load_state_dict(initial_state['optimizer'])
     initial_epoch = initial_state['epoch'] + 1
@@ -87,11 +100,6 @@ def train(path, split=[6, 1, 1], batch_size=64, epochs=100, learning_rate=0.001,
   batch_history_train = batch_history_train[:initial_epoch]
   epoch_history_train = epoch_history_train[:initial_epoch]
   epoch_history_dev = epoch_history_dev[:initial_epoch]
-
-
-  if gpu and gpu_available:
-    model = model.cuda()
-    loss_fn = loss_fn.cuda()
 
   with tqdm(total=epochs, desc='Epoch', initial=initial_epoch) as epoch_bar:
     for epoch in range(initial_epoch, epochs):
