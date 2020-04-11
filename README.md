@@ -6,9 +6,11 @@
 
 本项目使用神经网络方法，基于两个开源验证码框架：EasyCaptcha和Kaptcha，设计了两个神经网络模型，并随机生成一批验证码图片供模型训练及验证。经过实验发现，EasyCaptcha验证码相对简单，较容易识别，并且噪音较少，因此只需简单的模型即可达到高精度识别。而Kaptcha相对复杂，含有噪音，并且验证码可变形式较多，识别较困难。
 
-本项目两个模型在EasyCaptcha验证码上达到了$98\sim 99\%$的精度水平，而在Kaptcha上达到了$93\sim 94\%$的水平，基本可实现较为准确的识别。
+本项目两个模型在EasyCaptcha验证码上达到了$98\sim 99\% $的精度水平，而在Kaptcha上达到了$93\sim 94\%$的水平，基本可实现较为准确的识别。
 
 该项目提供了模型训练所用的训练集，均采用开源框架自动生成。此外还提供可直接嵌入使用的预训练模型。
+
+> 若您的公式无法正常显示，请您移步：[https://chrome.google.com/webstore/detail/mathjax-plugin-for-github/ioemnmodlmafdkllaclgeombjnmnbima](https://chrome.google.com/webstore/detail/mathjax-plugin-for-github/ioemnmodlmafdkllaclgeombjnmnbima)，使用Chrome安装公式渲染扩展。
 
 ### 依赖环境
 
