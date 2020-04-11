@@ -7,6 +7,7 @@ public interface CaptchaGenerator {
    * @param folder the folder path to output
    * @return Successful or failed after created.
    */
+  @Deprecated
   public boolean generate(String folder);
 
   /**

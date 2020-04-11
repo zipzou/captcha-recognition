@@ -10,24 +10,22 @@ import os
 import json
 
 # from tqdm import tqdm
-from tqdm import tqdm_notebook as tqdm
+from tqdm.notebook import tqdm
 
 from data import get_data_split
 from dataloader import CaptchaLoader
-from model import CaptchaModel
 
-def acc(input, target):
-  input = torch.argmax(input, dim=-1)
-  eq = input == target
-  return (eq.sum(dtype=torch.float32) / eq.shape[0]).item()
+from metrics import acc, multi_acc
 
-def recall(input, target):
-  pass
-
-def precision(input, target):
-  pass
 
 def save_history(filename, history, history_path):
+  """
+
+  :param filename:
+  :param history:
+  :param history_path:
+  :return:
+  """
   if not os.path.exists(history_path):
     os.mkdir(history_path)
   out_file = os.path.join(history_path, filename)
@@ -35,6 +33,12 @@ def save_history(filename, history, history_path):
     json.dump(history, out_fp)
 
 def load_history(filename, history_path):
+  """
+
+  :param filename:
+  :param history_path:
+  :return:
+  """
   in_path = os.path.join(history_path, filename)
   if not os.path.exists(in_path):
     return []
@@ -42,8 +46,31 @@ def load_history(filename, history_path):
     history = json.load(in_fp)
   return history
 
-def train(path, split=[6, 1, 1], batch_size=64, epochs=100, learning_rate=0.001, initial_epoch=0, step_saving=2, model_dir='./', log_file='./history', continue_pkl=None, gpu=True):
+def train(path, split=[6, 1, 1], batch_size=64, epochs=100, learning_rate=0.001, initial_epoch=0, step_saving=2, model_dir='./', log_file='./history', continue_pkl=None, gpu=True, mode='captcha'):
+  """
 
+  :param path:
+  :param split:
+  :param batch_size:
+  :param epochs:
+  :param learning_rate:
+  :param initial_epoch:
+  :param step_saving:
+  :param model_dir:
+  :param log_file:
+  :param continue_pkl:
+  :param gpu:
+  :param mode:
+  :return:
+  """
+  if mode == 'captcha':
+    from model import CaptchaModel
+    CaptchaModelDynamic = CaptchaModel
+  elif mode == 'kaptcha':
+    from kaptcha_model import CaptchaModel
+    CaptchaModelDynamic = CaptchaModel
+  else:
+    return
   x_train, y_train, x_dev, y_dev = get_data_split(path, split=split, modes=['train', 'dev'])
 
   train_ds = CaptchaLoader((x_train, y_train), shuffle=True)
@@ -54,7 +81,7 @@ def train(path, split=[6, 1, 1], batch_size=64, epochs=100, learning_rate=0.001,
 
   gpu_available = torch.cuda.is_available()
 
-  model = CaptchaModel()
+  model = CaptchaModelDynamic()
   optm = torch.optim.Adam(model.parameters(), lr=learning_rate)
   loss_fn = nn.CrossEntropyLoss()
 
@@ -106,6 +133,7 @@ def train(path, split=[6, 1, 1], batch_size=64, epochs=100, learning_rate=0.001,
       model.train()
       loss_batchs = []
       acc_batchs = []
+      multi_acc_batchs = []
       with tqdm(total=int(np.ceil(len(train_loader.dataset) / batch_size)), desc='Batch') as batch_bar:
         for batch, (x, y) in enumerate(train_loader):
           optm.zero_grad()
@@ -122,20 +150,24 @@ def train(path, split=[6, 1, 1], batch_size=64, epochs=100, learning_rate=0.001,
           acc_count = acc(pred_1, y[:,0]) + acc(pred_2, y[:,1]) + acc(pred_3, y[:,2]) + acc(pred_4, y[:,3])
           acc_mean = acc_count / 4.
 
+          pred = torch.stack((pred_1, pred_2, pred_3, pred_4), dim=-1)
+          multi_acc_mean = multi_acc(torch.argmax(pred, dim=1), y)
+
           loss_batchs.append(loss_count.item())
           acc_batchs.append(acc_mean)
+          multi_acc_batchs.append(multi_acc_mean)
 
-          batch_bar.set_postfix(loss=loss_count.item(), acc=acc_mean)
+          batch_bar.set_postfix(loss=loss_count.item(), acc=acc_mean, multi_acc=multi_acc_mean)
           batch_bar.update()
-          batch_history_train.append([loss_count.item(), acc_mean])
+          batch_history_train.append([loss_count.item(), acc_mean, multi_acc_mean])
           save_history('history_batch_train.json', batch_history_train, log_file)
 
           loss_count.backward()
           optm.step()
 
-      epoch_bar.set_postfix(loss_mean=np.mean(loss_batchs), acc_mean=np.mean(acc_batchs))
+      epoch_bar.set_postfix(loss_mean=np.mean(loss_batchs), acc_mean=np.mean(acc_batchs), multi_acc_mean=np.mean(multi_acc_batchs))
       epoch_bar.update()
-      epoch_history_train.append([np.mean(loss_batchs).item(), np.mean(acc_batchs).mean()])
+      epoch_history_train.append([np.mean(loss_batchs).item(), np.mean(acc_batchs).item(), np.mean(multi_acc_batchs).item()])
       save_history('history_epoch_train.json', epoch_history_train, log_file)
 
       # validate
@@ -143,6 +175,7 @@ def train(path, split=[6, 1, 1], batch_size=64, epochs=100, learning_rate=0.001,
         model.eval()
         loss_batchs_dev = []
         acc_batchs_dev = []
+        multi_acc_batchs_dev = []
         for batch, (x, y) in enumerate(dev_loader):
           x = torch.tensor(x, requires_grad=False)
           y = torch.tensor(y, requires_grad=False)
@@ -157,12 +190,16 @@ def train(path, split=[6, 1, 1], batch_size=64, epochs=100, learning_rate=0.001,
           acc_count = acc(pred_1, y[:,0]) + acc(pred_2, y[:,1]) + acc(pred_3, y[:,2]) + acc(pred_4, y[:,3])
           acc_mean = acc_count / 4.
 
+          pred = torch.stack((pred_1, pred_2, pred_3, pred_4), dim=-1)
+          multi_acc_mean = multi_acc(torch.argmax(pred, dim=1), y)
+
           loss_batchs_dev.append(loss_count.item())
           acc_batchs_dev.append(acc_mean)
+          multi_acc_batchs_dev.append(multi_acc_mean)
 
-          batch_bar.set_postfix(loss=loss_count.item(), acc=acc_mean)
+          batch_bar.set_postfix(loss=loss_count.item(), acc=acc_mean, multi_acc=multi_acc_mean)
           batch_bar.update()
-        epoch_history_dev.append([np.mean(loss_batchs_dev), np.mean(acc_batchs_dev)])
+        epoch_history_dev.append([np.mean(loss_batchs_dev).item(), np.mean(acc_batchs_dev).item(), np.mean(multi_acc_batchs_dev).item()])
         save_history('history_epoch_dev.json', epoch_history_dev, log_file)
 
       # saving
@@ -178,3 +215,43 @@ def train(path, split=[6, 1, 1], batch_size=64, epochs=100, learning_rate=0.001,
         torch.save(state_dict, model_path)
 
       torch.save(state_dict, os.path.join(model_dir, 'model-latest.pkl'))
+
+
+import click
+
+@click.command()
+@click.help_option('-h', '--help')
+@click.option('-i', '--data_dir', default='./captchas', type=click.Path(), help='The path of train data', required=False)
+@click.option('-m', '--mode', default='captcha', help='The model type to train, could be captcha or kaptcha', type=click.Choice(['captcha', 'kaptcha']), required=False)
+@click.option('-e', '--epoch', default=120, help='The number of epoch model trained', required=False)
+@click.option('-p', '--data_split', default=[6, 1, 1], nargs=3, type=int, help='The split of train data to split', required=False)
+@click.option('-c', '--continue_train', default=None, help='If continue after last checkpoint or a specified one', required=False)
+@click.option('-t', '--checkpoint', default=0, type=int, help='The initial checkpoint to start, if set, it will load model-[checkpoint].pkl', required=False)
+@click.option('-b', '--batch_size', default=128, type=int, help='The batch size of input data', required=False)
+@click.option('-o', '--model_dir', default='./captcha_models', type=click.Path(), help='The model dir to save models or load models', required=False)
+@click.option('-r', '--lr', default=0.001, type=float, help='The learning rate to train', required=False)
+@click.option('-l', '--log_dir', default='./logs', type=click.Path(), help='The log files path', required=False)
+@click.option('-u', '--use_gpu', type=bool, default=False, help='Train by gpu or cpu', required=False)
+@click.option('-s', '--save_frequency', default=2, type=int, help='The frequence to save the models during training', required=False)
+def read_cli(data_dir, mode, epoch, data_split, continue_train, checkpoint, batch_size, model_dir, lr, log_dir, use_gpu, save_frequency):
+  """
+
+  :param data_dir:
+  :param mode:
+  :param epoch:
+  :param data_split:
+  :param continue_train:
+  :param checkpoint:
+  :param batch_size:
+  :param model_dir:
+  :param lr:
+  :param log_dir:
+  :param use_gpu:
+  :param save_frequency:
+  :return:
+  """
+  train(data_dir, data_split, batch_size, epoch, lr, checkpoint, save_frequency, model_dir, log_dir, continue_train, use_gpu, mode)
+
+
+if __name__ == "__main__":
+  read_cli()

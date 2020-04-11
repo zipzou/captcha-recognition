@@ -39,7 +39,7 @@ class CaptchaModel(nn.Module):
     self.dropout = nn.Dropout(0.1)
 
     self.out1 = nn.Linear(128, 62)
-    self.out2 = nn.Linear(·128, 62)
+    self.out2 = nn.Linear(128, 62)
     self.out3 = nn.Linear(128, 62)
     self.out4 = nn.Linear(128, 62)
 
@@ -50,7 +50,7 @@ class CaptchaModel(nn.Module):
 
     y_conv3 = self.conv3(y_conv2)
 
-    z_1 = self.dense1·(y_conv3)
+    z_1 = self.dense1(y_conv3)
 
     z_dropout = self.dropout(z_1)
 

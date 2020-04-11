@@ -1,15 +1,27 @@
 import torch
 
-from model import CaptchaModel
-
 from PIL import Image
 from torchvision.transforms import Compose, ToTensor
 
 from data import get_dict
 
-def predict(captcha, model_dir='./model/model-latest.pkl', use_gpu=True):
-  gpu_available = torch.cuda.is_available()
+def predict(captcha, model_dir='./model/model-latest.pkl', use_gpu=True, mode='captcha'):
+  """
 
+  :param captcha:
+  :param model_dir:
+  :param use_gpu:
+  :param mode:
+  :return:
+  """
+  gpu_available = torch.cuda.is_available()
+  
+  if mode == 'captcha':
+    from model import CaptchaModel
+  elif mode == 'kaptcha':
+    from model import CaptchaModel
+  else:
+    return
   model = CaptchaModel()
 
   if use_gpu and gpu_available:
@@ -44,6 +56,25 @@ def predict(captcha, model_dir='./model/model-latest.pkl', use_gpu=True):
 
   return res
 
-import matplotlib.pyplot as plt
+import click
 
-plt.imshow
+@click.command()
+@click.help_option('-h', '--help')
+@click.option('-i', '--image_path', type=click.Path(), help='The path of the captcha image', required=True)
+@click.option('-m', '--mode', default='captcha', help='The model type to train, could be captcha or kaptcha', type=click.Choice(['captcha', 'kaptcha']), required=False)
+@click.option('-o', '--model_dir', default='./captcha_models/model-latest.pkl', type=click.Path(), help='The model dir to save models or load models', required=False)
+@click.option('-u', '--use_gpu', default=False, type=bool, help='Train by gpu or cpu', required=False)
+def read_cli(image_path, model_dir, mode, use_gpu):
+  """
+
+  :param image_path:
+  :param model_dir:
+  :param mode:
+  :param use_gpu:
+  :return:
+  """
+  res = predict(image_path, model_dir, use_gpu, mode)
+  print('The result of the captcha is: ' + str(res))
+
+if __name__ == "__main__":
+  read_cli()

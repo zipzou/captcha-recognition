@@ -1,5 +1,7 @@
 # CNN验证码识别
 
+![Version](https://img.shields.io/badge/version-1.0-brightgreen.svg) ![Build](https://img.shields.io/badge/build-passing-brightgreen.svg)  ![https://github.com/Frank17/fight-game/releases](https://img.shields.io/badge/release-v1.0-brightgreen.svg) ![java-version](https://img.shields.io/badge/java->=1.8-brightgreen.svg)  ![java-version](https://img.shields.io/badge/python->=3.6-brightgreen.svg)
+
 ## 介绍
 
 本项目使用神经网络方法，基于两个开源验证码框架：EasyCaptcha和Kaptcha，设计了两个神经网络模型，并随机生成一批验证码图片供模型训练及验证。经过实验发现，EasyCaptcha验证码相对简单，较容易识别，并且噪音较少，因此只需简单的模型即可达到高精度识别。而Kaptcha相对复杂，含有噪音，并且验证码可变形式较多，识别较困难。
@@ -11,6 +13,7 @@
 ### 依赖环境
 
 * Python 3.6
+* click 7.1.1
 * PyTorch 1.4.0
 * torchvision 0.1.6.dev0
 * tqdm 4.45.0
@@ -22,7 +25,145 @@
 
 ## 开始使用
 
-==完善中，请稍后==
+若要生成训练验证码图片，请使用`captcha-images-1.0.jar`，其使用方式如下：
+
+```shell
+usage: java -jar [jarfile].jar
+ -c <text_color>        The text color of the captcha, if not specified,
+                        use randomly, should be <R>,<G>,<B>
+ -e <noise_same_text>   If the noise color is the same with the text
+                        color, should be true or false, default false.
+ -h                     Show help
+ -k <kinds>             The kinds of captchas, integer, default 1
+ -l <length>            The length of characters in the captchas, integer,
+                        default 4
+ -m <mode>              The mode of captcha, could be [easycaptcha] or
+                        [kaptcha]
+ -n <noise_color>       The noise color of the captcha, if not specified,
+                        use randomly, should be <R>,<G>,<B>
+ -o <output_dir>        The output directory of captchas, string
+ -p <pool_size>         Thread pool size, integer, default 20
+ -s <size>              The size of the capthcas, should be:
+                        <width>,<height>
+ -t <count>             The count to produce, integer, default 5,000
+ -v <height>            The height of the capthcas, integer, default 80
+ -w <width>             The width of the capthcas, integer, default 120
+
+```
+
+任务启动后，将并发创建一批验证码图片，并存入指定的目录中。
+
+如果在notebook中使用，请在`train.py`与`eval.py`中切换如下包
+```python
+# from tqdm import tqdm
+from tqdm.notebook import tqdm
+```
+
+> `tqdm`在shell中展示进度条，而`tqdm.notebook`则在notebook环境中，展示进度条，其显示风格更加符合HTML规范
+
+若需要从头开始，或根据已有的快照继续训练模型，请使用`train.py`文件，使用方法如下：
+
+```shell
+Usage: train.py [OPTIONS]
+
+Options:
+  -h, --help                    Show this message
+                                and exit.
+
+  -i, --data_dir PATH           The path of train
+                                data
+
+  -m, --mode [captcha|kaptcha]  The model type to
+                                train, could be
+                                captcha or kaptcha
+
+  -e, --epoch INTEGER           The number of
+                                epoch model
+                                trained
+
+  -p, --data_split INTEGER...   The split of train
+                                data to split
+
+  -c, --continue_train TEXT     If continue after
+                                last checkpoint or
+                                a specified one
+
+  -t, --checkpoint INTEGER      The initial
+                                checkpoint to
+                                start, if set, it
+                                will load model-[c
+                                heckpoint].pkl
+
+  -b, --batch_size INTEGER      The batch size of
+                                input data
+
+  -o, --model_dir PATH          The model dir to
+                                save models or
+                                load models
+
+  -r, --lr FLOAT                The learning rate
+                                to train
+
+  -l, --log_dir PATH            The log files path
+  -u, --use_gpu BOOLEAN         Train by gpu or
+                                cpu
+
+  -s, --save_frequency INTEGER  The frequence to
+                                save the models
+                                during training
+```
+
+若需要对已有模型进行评估，请使用`eval.py`文件，其使用方式如下：
+
+```shell
+Usage: eval.py [OPTIONS]
+
+Options:
+  -h, --help                    Show this message and exit.
+  -i, --data_dir PATH           The path of train data
+  -m, --mode [captcha|kaptcha]  The model type to train, could be captcha or
+                                kaptcha
+
+  -b, --batch_size INTEGER      The batch size of input data
+  -o, --model_dir PATH          The model dir to save models or load models
+  -l, --log_dir PATH            The log files path
+  -u, --use_gpu BOOLEAN         Train by gpu or cpu
+```
+
+
+若需要使用现有的模型对验证码进行识别，请使用`predict.py`，其使用方法如下：
+
+
+```shell
+Usage: predict.py [OPTIONS]
+
+Options:
+  -h, --help                    Show this message and exit.
+  -i, --image_path PATH         The path of the captcha image  [required]
+  -m, --mode [captcha|kaptcha]  The model type to train, could be captcha or
+                                kaptcha
+
+  -o, --model_dir PATH          The model dir to save models or load models
+  -u, --use_gpu BOOLEAN         Train by gpu or cpu
+```
+
+
+### 示例
+
+```shell
+java -jar captcha-images-1.0.jar
+
+# 默认为输出路径为：./captchas
+# 开始训练模型
+python train.py -i ./captchas -m captcha -b 1024 -o ./models -u True
+
+# 开始评估模型
+python eval.py -i ./captchas -m captcha -b 128
+
+# 开始预测 使用中，请将abcd.jpg换成实际的测试用验证码文件
+python predict -i ./captchas/abcd.jpg
+```
+
 
 ## 数据集介绍
 

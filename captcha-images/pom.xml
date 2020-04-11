@@ -29,15 +29,47 @@
       <artifactId>easy-captcha</artifactId>
       <version>1.6.2</version>
     </dependency>
+    <!-- https://mvnrepository.com/artifact/commons-cli/commons-cli -->
+    <dependency>
+      <groupId>commons-cli</groupId>
+      <artifactId>commons-cli</artifactId>
+      <version>1.4</version>
+    </dependency>
    <!-- https://mvnrepository.com/artifact/com.github.penggle/kaptcha -->
     <dependency>
       <groupId>com.github.penggle</groupId>
       <artifactId>kaptcha</artifactId>
       <version>2.3.2</version>
     </dependency>
+    <!-- https://mvnrepository.com/artifact/log4j/log4j -->
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <version>1.2.17</version>
+    </dependency>
   </dependencies>
 
   <build>
+    <resources>  
+      <resource>  
+        <directory>src/main/resources</directory>  
+        <includes>  
+          <include>**/*.properties</include>  
+          <include>**/*.xml</include>  
+          <include>**/*.tld</include>  
+        </includes>  
+        <filtering>false</filtering>  
+      </resource>  
+      <resource>  
+        <directory>src/main/java</directory>  
+          <includes>  
+            <include>**/*.properties</include>  
+            <include>**/*.xml</include>  
+            <include>**/*.tld</include>  
+        </includes>  
+        <filtering>false</filtering>  
+      </resource>  
+    </resources> 
     <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
       <plugins>
         <!-- clean lifecycle, see https://maven.apache.org/ref/current/maven-core/lifecycles.html#clean_Lifecycle -->
@@ -78,6 +110,21 @@
         <plugin>
           <artifactId>maven-project-info-reports-plugin</artifactId>
           <version>3.0.0</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <configuration>
+            <descriptors>
+            </descriptors>
+            <archive>
+              <manifest>
+                <mainClass>me.zouzhipeng.App</mainClass>
+              </manifest>
+            </archive>
+            <descriptorRefs>
+              <descriptorRef>jar-with-dependencies</descriptorRef>
+            </descriptorRefs>
+          </configuration>
         </plugin>
       </plugins>
     </pluginManagement>
