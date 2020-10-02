@@ -145,7 +145,7 @@ Options:
   -m, --mode [captcha|kaptcha]  The model type to train, could be captcha or
                                 kaptcha
 
-  -o, --model_dir PATH          The model dir to save models or load models
+  -o, --model_dir PATH          The model dir to load
   -u, --use_gpu BOOLEAN         Train by gpu or cpu
 ```
 
