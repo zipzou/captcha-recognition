@@ -71,6 +71,8 @@ def train(path, split=[6, 1, 1], batch_size=64, epochs=100, learning_rate=0.001,
     CaptchaModelDynamic = CaptchaModel
   else:
     return
+  if not os.path.exists(path):
+    raise FileNotFoundError("未知的训练数据")
   x_train, y_train, x_dev, y_dev = get_data_split(path, split=split, modes=['train', 'dev'])
 
   train_ds = CaptchaLoader((x_train, y_train), shuffle=True)

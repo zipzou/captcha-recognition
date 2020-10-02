@@ -19,7 +19,7 @@ def predict(captcha, model_dir='./model/model-latest.pkl', use_gpu=True, mode='c
   if mode == 'captcha':
     from model import CaptchaModel
   elif mode == 'kaptcha':
-    from model import CaptchaModel
+    from kaptcha_model import CaptchaModel
   else:
     return
   model = CaptchaModel()

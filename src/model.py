@@ -2,7 +2,6 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-
 class CaptchaModel(nn.Module):
   def __init__(self):
     super(CaptchaModel, self).__init__()
@@ -29,11 +28,11 @@ class CaptchaModel(nn.Module):
     #   nn.RReLU(),
     # )
 
-    # self.dense1 = nn.Sequential(
-    #   nn.Linear(256, 64),
-    #   nn.BatchNorm1d(64),
-    #   nn.RReLU()
-    # )
+    self.dense1 = nn.Sequential(
+      nn.Linear(256, 64),
+      nn.BatchNorm1d(64),
+      nn.RReLU()
+    )
 
     self.dropout = nn.Dropout(0.3)
 
@@ -49,7 +48,7 @@ class CaptchaModel(nn.Module):
 
     # y_conv3 = self.conv3(y_conv2)
 
-    # z_1 = self.dense1(y_conv2)
+    z_1 = self.dense1(y_conv2)
 
     z_dropout = self.dropout(y_conv2)
 
