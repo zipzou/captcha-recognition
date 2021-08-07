@@ -40,7 +40,7 @@ public class KaptchaGeneratorWorker implements CaptchaGenerator {
       prop.put(Constants.KAPTCHA_NOISE_COLOR,
         String.join(",", rand.nextInt(256) + "", rand.nextInt(256) + "", rand.nextInt(256) + ""));
     }
-    prop.put(Constants.KAPTCHA_TEXTPRODUCER_CHAR_STRING, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz012345679");
+    prop.put(Constants.KAPTCHA_TEXTPRODUCER_CHAR_STRING, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
     this.output = config.get(ConfigConstants.OUT_DIR);
     Config kaptchaConfig = new Config(prop);
     producer = kaptchaConfig.getProducerImpl();
