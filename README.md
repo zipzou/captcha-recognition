@@ -171,7 +171,7 @@ python predict -i ./captchas/abcd.jpg
 
 所有训练数据均以验证码图片内容为名称命名，如`2ANF.jpg`，因此可以保证训练数据没有重复项，根据文件名即可获取样本label。
 
-数据集下载：[Dataset-Google Drive for Easy Captcha](https://drive.google.com/file/d/1QwLBp35Q_-b6GCZ7BjCsIf5L3YpkLRLg/view?usp=sharing)
+数据集下载：[Dataset-Google Drive for Easy Captcha](https://drive.google.com/file/d/1HhTTbN8cjBs-1hEv38lpxBhD_z8EOGlk/view?usp=sharing)
 
 > 数据规格：48,320张验证码图片，全由`Easy Captcha`框架生成，大小为$120 \times 80$。
 
@@ -182,7 +182,7 @@ python predict -i ./captchas/abcd.jpg
 
 EasyCaptcha验证码特点在于可以构造Gif动态验证码，而其他验证码则显得相对简单，主要在于该验证码间隔较开，易于区分，因此识别较为简单。根据对上例中的验证码分析可知，验证码由不定位置的1-2个圆圈与曲线构成噪音，对文本加以干扰，文字颜色可变。从布局来看，文字的布局位置相对固定，且间隔也相对固定，这无疑也简化了识别过程。
 
-数据集下载：[Dataset-Google Drive for Kaptcha](https://drive.google.com/file/d/1HhTTbN8cjBs-1hEv38lpxBhD_z8EOGlk/view?usp=sharing)
+数据集下载：[Dataset-Google Drive for Kaptcha](https://drive.google.com/file/d/1QwLBp35Q_-b6GCZ7BjCsIf5L3YpkLRLg/view?usp=sharing)
 
 > 数据规格：52,794张验证码图片，全由`Kaptcha`生成，大小为$200 \times 50$。
 

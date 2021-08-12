@@ -30,8 +30,8 @@ def get_dict():
     id2label[1 + i] = chr(ord('A') + i)
   # lower case
   for i in range(26):
-    label2id[chr(ord('a') + i)] = 1 + i
-    id2label[1 + i] = chr(ord('a') + i)
+    label2id[chr(ord('a') + i)] = 1 + i + 26
+    id2label[1 + i + 26] = chr(ord('a') + i)
   # numbers
   for i in range(10):
     label2id[chr(ord('0') + i)] = 53 + i 
